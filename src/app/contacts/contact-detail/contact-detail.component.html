@@ -1,1 +1,32 @@
-<p>contact-detail works!</p>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h2>{{ contact.name }}</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{ contact.imageUrl }}" alt="{{ contact.name }}">
+                    </div>  
+                    <div class="btn-group col-md-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" type="button">Edit</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-danger" type="button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>{{ contact.email }}</p>
+                        <p>{{ contact.phone }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
