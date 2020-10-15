@@ -10,4 +10,4 @@ export class DropdownDirective {
     @HostListener('click') toggleOpen() {
         this.isOpen = !this.isOpen;
     }
-}
+} 
