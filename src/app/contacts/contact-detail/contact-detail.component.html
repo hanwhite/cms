@@ -10,10 +10,10 @@
                     </div>  
                     <div class="btn-group col-md-3">
                         <div class="col-md-6">
-                            <button class="btn btn-primary" type="button">Edit</button>
+                            <a [routerLink]="['edit']" class="btn btn-primary" type="button">Edit</a>
                         </div>
                         <div class="col-md-6">
-                            <button class="btn btn-danger" type="button">Delete</button>
+                            <a (click)="onDelete()" class="btn btn-danger" type="button">Delete</a>
                         </div>
                     </div>
                 </div>
