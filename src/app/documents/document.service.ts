@@ -16,7 +16,7 @@ export class DocumentService {
         this.documents = MOCKDOCUMENTS;
     }
 
-    getDocuments() {
+    getDocuments(): Document[] {
         return this.documents.slice();
     }
 
