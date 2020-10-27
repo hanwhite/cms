@@ -20,14 +20,8 @@ export class DocumentService {
         return this.documents.slice();
     }
 
-    getDocument(id: string) {
-        for (let document of this.documents) {
-            if (document.id = id) {
-                return document;
-            }
-        }
-        return null;
-    
+    getDocument(id: string): Document {
+        return this.documents.find((document) => document.id === id);
     }
 
     deleteDocument(document: Document) {

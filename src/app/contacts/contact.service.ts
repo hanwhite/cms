@@ -16,19 +16,14 @@ export class ContactService {
         this.contacts = MOCKCONTACTS;
     }
 
-    getContacts() {
+    getContacts(): Contact[] {
         return this.contacts
         .sort((a, b)=> a.name > b.name ? 1: b.name > a.name ? -1 : 0)
         .slice();
     }
 
-    getContact(id: string) {
-        for (let contact of this.contacts) {
-            if (contact.id = id) {
-                return contact;
-            }
-        }
-        return null;
+    getContact(id: string): Contact {
+        return this.contacts.find((contact) => contact.id === id);
     }
 
     deleteContact(contact: Contact) {
