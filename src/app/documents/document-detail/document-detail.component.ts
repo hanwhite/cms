@@ -30,13 +30,6 @@ export class DocumentDetailComponent implements OnInit {
           this.document = this.documentService.getDocument(this.id);
       }
     )
-
-    // this.router.events.subscribe(
-    //   ()=>{
-    //     let id: string = this.route.snapshot.params.id;
-    //     this.document = this.documentService.getDocument(id);
-    //   }
-    // )
     
   }
 
