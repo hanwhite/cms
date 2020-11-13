@@ -2,6 +2,7 @@ import { MOCKDOCUMENTS } from './MOCKDOCUMENTS';
 import { Document } from './document.model';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 
 @Injectable({
@@ -10,18 +11,29 @@ import { Subject } from 'rxjs';
 export class DocumentService {
 
     documentListChangedEvent = new Subject<Document[]>();
-    documents: Document[];
-    maxId: number;
+    documents: Document[] = [];
     maxDocumentId: number;
 
 
-    constructor() {
+    constructor(private http: HttpClient) {
         this.documents = MOCKDOCUMENTS;
         this.maxDocumentId = this.getMaxId();
     }
 
-    getDocuments(): Document[] {
-        return this.documents.slice();
+    getDocuments() {
+        this.http
+        .get('https://cmsproject-640ac.firebaseio.com/documents.json')
+        .subscribe(
+            (documents: Document[]) => {
+                this.documents = documents;
+                this.maxDocumentId = this.getMaxId();
+                this.documents.sort((a, b) => (a.name > b.name ? 1 : ((b.name > a.name) ? -1 : 0)));
+                this.documentListChangedEvent.next(this.documents.slice());
+            },
+            (error: any) => {
+                console.log(error);
+            }
+        );
     }
 
     getDocument(id: string): Document {
@@ -37,21 +49,20 @@ export class DocumentService {
             return;
         }
         this.documents.splice(pos, 1);
-        this.documentListChangedEvent.next(this.documents.slice());
+        this.storeDocuments();
     }
 
     getMaxId(): number {
 
-        this.maxId = 0;
+        let maxId = 0;
 
         for (let document of this.documents) {
             const currentId = Number(document.id);
-            if (currentId > this.maxId) {
-                this.maxId = currentId
+            if (currentId > maxId) {
+                maxId = currentId
             }
         }
-
-        return this.maxId;
+        return maxId;
     }
 
     addDocument(newDocument: Document) {
@@ -61,7 +72,7 @@ export class DocumentService {
         this.maxDocumentId++;
         newDocument.id = this.maxDocumentId.toString();
         this.documents.push(newDocument);
-        this.documentListChangedEvent.next(this.documents.slice());
+        this.storeDocuments();
     }
 
     updateDocument(originalDocument: Document, newDocument: Document) {
@@ -75,7 +86,21 @@ export class DocumentService {
         newDocument.id = originalDocument.id;
         this.documents[pos] = newDocument;
         const documentsListClone = this.documents.slice();
-        this.documentListChangedEvent.next(documentsListClone);
+        this.storeDocuments();
+    }
+
+    storeDocuments() {
+        let documents = JSON.stringify(this.documents);
+        const headers = new HttpHeaders({'Content-Type': 'application/json'});
+        this.http
+        .put('https://cmsproject-640ac.firebaseio.com/documents.json',
+            documents,
+            { headers: headers })
+        .subscribe(
+            () => {
+                this.documentListChangedEvent.next(this.documents.slice());
+            }
+        );
     }
 
 }
