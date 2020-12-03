@@ -4,7 +4,7 @@ import { MOCKCONTACTS } from './MOCKCONTACTS';
 import { Subject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-@Injectable({
+@Injectable({ 
     providedIn: 'root'
 })
 export class ContactService {
@@ -19,7 +19,7 @@ export class ContactService {
 
     getContacts() {
         this.http
-        .get('https://cmsproject-640ac.firebaseio.com/contacts.json')
+        .get('http://localhost:3000/contacts')
         .subscribe(
             (contacts: Contact[]) => {
                 this.contacts = contacts;
@@ -41,12 +41,19 @@ export class ContactService {
         if (!contact) {
             return;
         }
-        const pos = this.contacts.indexOf(contact);
+        const pos = this.contacts.findIndex(c => c.id === contact.id);
+
         if (pos < 0) {
             return;
         }
-        this.contacts.splice(pos, 1);
-        this.storeContacts();
+        
+        this.http.delete('http://localhost:3000/contacts/' + contact.id)
+        .subscribe(
+          (response: Response) => {
+            this.contacts.splice(pos, 1);
+            this.storeContacts();
+          }
+        );
     }
 
     getMaxId(): number {
@@ -61,23 +68,54 @@ export class ContactService {
         return maxId;
     }
 
-    addContact(newContact: Contact) {
-        if (!newContact) {
+    addContact(contact: Contact) {
+        if (!contact) {
             return;
         }
-        this.maxContactId++;
-        newContact.id = this.maxContactId.toString();
-        this.contacts.push(newContact);
-        const contactsListClone = this.contacts.slice();
-        this.storeContacts();
-    }
+
+        contact.id = '';
+
+        const headers = new HttpHeaders({'Content-Type': 'application/json'});
+    
+        // add to database
+        this.http.post<{ message: string, contact: Contact }>('http://localhost:3000/contacts',
+          contact,
+          { headers: headers })
+          .subscribe(
+            (responseData) => {
+              // add new contact to contacts
+              this.contacts.push(responseData.contact);
+              this.storeContacts();
+            }
+          );
+      }
 
     updateContact(originalContact: Contact, newContact: Contact) {
         if (!originalContact || !newContact) {
             return;
-        }
-        const pos = this.contacts.indexOf(originalContact)
-        this.storeContacts();
+          }
+      
+          const pos = this.contacts.findIndex(d => d.id === originalContact.id);
+      
+          if (pos < 0) {
+            return;
+          }
+      
+          // set the id of the new Contact to the id of the old Contact
+          newContact.id = originalContact.id;
+        //    newContact._id = originalContact._id;
+      
+          const headers = new HttpHeaders({'Content-Type': 'application/json'});
+      
+          // update database
+          this.http.put('http://localhost:3000/contacts/' + originalContact.id,
+          newContact, { headers: headers })
+            .subscribe(
+              (response: Response) => {
+                this.contacts[pos] = newContact;
+                this.storeContacts();
+              }
+            );
     }
 
     storeContacts() {

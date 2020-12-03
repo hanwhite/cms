@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root' 
 })
 export class MessageService {
     messageChangedEvent = new EventEmitter<Message[]>();
@@ -30,12 +30,11 @@ export class MessageService {
 
     getMessages() {
         this.http
-        .get('https://cmsproject-640ac.firebaseio.com/messages.json')
+        .get('http://localhost:3000/messages')
         .subscribe(
             (messages: Message[]) => {
                 this.messages = messages;
                 this.maxMessageId = this.getMaxId();
-                // sort?
                 this.messageChangedEvent.next(this.messages.slice());
             },
             (error: any) => {
@@ -54,8 +53,26 @@ export class MessageService {
     }
 
     addMessage(message: Message) {
-        this.messages.push(message);
-        this.storeMessages();
+        if (!message) {
+            return;
+          }
+      
+          // make sure id of the new Message is empty
+          message.id = '';
+      
+          const headers = new HttpHeaders({'Content-Type': 'application/json'});
+      
+          // add to database
+          this.http.post<{message: Message }>('http://localhost:3000/messages',
+            message,
+            { headers: headers })
+            .subscribe(
+              (responseData) => {
+                // add new message to messages
+                this.messages.push(responseData.message);
+                this.storeMessages();
+              }
+            );
     }
 
     storeMessages() {
